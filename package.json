@@ -1,0 +1,26 @@
+{
+  "name": "jzr",
+  "version": "0.0.1",
+  "description": "Prelimary: find repetitions in strings, naive algorithm (for lack of a nail)",
+  "main": "lib/main.js",
+  "scripts": {
+    "build": "coffee --map -o lib -c src",
+    "doctoc": "doctoc README.md",
+    "test-travis": "node lib/tests.js",
+    "test": "npm run build && tap lib/tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loveencounterflow/jzr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/loveencounterflow/jzr/issues"
+  },
+  "homepage": "https://github.com/loveencounterflow/jzr",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cnd": "^4.2.2",
+    "tap": "^10.3.2"
+  }
+}
