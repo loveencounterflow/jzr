@@ -13,122 +13,35 @@ help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-ƒ                         = Array.from
-JZR                      = require '../..'
+JZR                       = require '../..'
 TAP                       = require 'tap'
 
-#-----------------------------------------------------------------------------------------------------------
-_copy_regex = ( regex, flags ) -> new RegExp regex.source, flags
 
-#-----------------------------------------------------------------------------------------------------------
-@find_repetitions = ( text ) ->
-  R           = []
-  collector   = {}
-  chrs        = Array.from text
-  text_length = chrs.length
-  #.........................................................................................................
-  return R if text_length < 2
-  #.........................................................................................................
-  for first_idx in [ 0 .. text_length - 2 ] by +1
-    sub_text = chrs[ first_idx .. ].join ''
-    @_find_repetitions sub_text, text, collector
-  # #.........................................................................................................
-  # @_find_repetitions text, collector
-  R.push hit for _, hit of collector
-  R.sort ( a, b ) ->
-    { area: a_area, count: a_count, length: a_length, } = a
-    { area: b_area, count: b_count, length: b_length, } = b
-    return +1 if a_area   < b_area
-    return -1 if a_area   > b_area
-    return +1 if a_count  < b_count
-    return -1 if a_count  > b_count
-    return +1 if a_length < b_length
-    return -1 if a_length > b_length
-    return  0
-  return R
-
-#-----------------------------------------------------------------------------------------------------------
-@_pattern = /// ( [^_]+ ) (?: .* \1 )+ ///
-
-#-----------------------------------------------------------------------------------------------------------
-@_find_repetitions = ( text, reference, collector ) ->
-  return null unless ( match = text.match @_pattern )?
-  [ _, d, ]       = match
-  idxs            = []
-  pattern_2       = /// #{CND.escape_regex d} ///g
-  count           = 0
-  count          += +1 while result = pattern_2.exec reference
-  d_size          = ( Array.from d ).length
-  area            = d_size * count
-  hit             = { d, length: d_size, count, area, }
-  collector[ d ] ?= hit
-  @_find_repetitions ( text.replace pattern_2, '_'.repeat d_size ), reference, collector
-  return null
-
-
-L = @
 #-----------------------------------------------------------------------------------------------------------
 TAP.test "additional 5", ( T ) ->
   probes_and_matchers = [
-    [ "xyz",[]]
-    [ "barbarbar",[]]
-    [ "abcdef",[]]
-    [ "foobarbarbar",[]]
-    [ "",[]]
-    [ "oo",[]]
-    [ "foobarbarbarfoo",[]]
-    [ "foobarrbarrbarrfoo",[]]
-    [ "bannanana",[]]
-    [ "䀠目几几几",[]]
-    [ "䀠几乎目几乎几几几几乎",[]]
-    [ "几乎几乎几乎几乎",[]]
-    [ "几几几几乎䀠几乎目几乎",[]]
-    [ "barONEbarTWObarTHREE",[]]
-    [ "1baron3baron5baron0KING6KING7",[]]
-    [ "0KING1baron3baron5baron6KING7",[]]
-    [ "XXXOXXX0KING1baron2KING3baron4KING5baron6KING7XOX",[]]
-    [ "xxxo|xxx|xxo",[]]
-    [ "xxo|xxx|xxo",[]]
-    [ "xo|xxx|xxo",[]]
-    [ "o|xxx|xxo",[]]
-    [ "|xxx|xxo",[]]
-    [ "xxx|xxo",[]]
-    [ "xx|xxo",[]]
-    [ "x|xxo",[]]
-    [ "|xxo",[]]
-    [ "xxo",[]]
-    [ "xo",[]]
-    [ "o",[]]
+    ["xyz",[]]
+    ["barbarbar",[{"d":"bar","length":3,"count":3,"area":9},{"d":"ar","length":2,"count":3,"area":6},{"d":"arb","length":3,"count":2,"area":6},{"d":"rba","length":3,"count":2,"area":6},{"d":"r","length":1,"count":3,"area":3}]]
+    ["abcdef",[]]
+    ["foobarbarbar",[{"d":"bar","length":3,"count":3,"area":9},{"d":"ar","length":2,"count":3,"area":6},{"d":"arb","length":3,"count":2,"area":6},{"d":"rba","length":3,"count":2,"area":6},{"d":"r","length":1,"count":3,"area":3},{"d":"o","length":1,"count":2,"area":2}]]
+    ["",[]]
+    ["oo",[{"d":"o","length":1,"count":2,"area":2}]]
+    ["foobarbarbarfoo",[{"d":"bar","length":3,"count":3,"area":9},{"d":"ar","length":2,"count":3,"area":6},{"d":"foo","length":3,"count":2,"area":6},{"d":"arb","length":3,"count":2,"area":6},{"d":"rba","length":3,"count":2,"area":6},{"d":"o","length":1,"count":4,"area":4},{"d":"oo","length":2,"count":2,"area":4},{"d":"r","length":1,"count":3,"area":3}]]
+    ["foobarrbarrbarrfoo",[{"d":"barr","length":4,"count":3,"area":12},{"d":"arr","length":3,"count":3,"area":9},{"d":"arrb","length":4,"count":2,"area":8},{"d":"rrba","length":4,"count":2,"area":8},{"d":"rbar","length":4,"count":2,"area":8},{"d":"r","length":1,"count":6,"area":6},{"d":"rr","length":2,"count":3,"area":6},{"d":"foo","length":3,"count":2,"area":6},{"d":"o","length":1,"count":4,"area":4},{"d":"oo","length":2,"count":2,"area":4}]]
+    ["bannanana",[{"d":"an","length":2,"count":3,"area":6},{"d":"na","length":2,"count":3,"area":6},{"d":"n","length":1,"count":4,"area":4},{"d":"a","length":1,"count":4,"area":4}]]
+    ["䀠目几几几",[{"d":"几","length":1,"count":3,"area":3}]]
+    ["䀠几乎目几乎几几几几乎",[{"d":"几","length":1,"count":6,"area":6},{"d":"几乎","length":2,"count":3,"area":6},{"d":"几几","length":2,"count":2,"area":4},{"d":"乎","length":1,"count":3,"area":3}]]
+    ["几乎几乎几乎几乎",[{"d":"几乎","length":2,"count":4,"area":8},{"d":"几乎几乎","length":4,"count":2,"area":8},{"d":"乎几","length":2,"count":3,"area":6},{"d":"乎几乎","length":3,"count":2,"area":6},{"d":"乎","length":1,"count":4,"area":4}]]
+    ["几几几几乎䀠几乎目几乎",[{"d":"几","length":1,"count":6,"area":6},{"d":"几乎","length":2,"count":3,"area":6},{"d":"几几","length":2,"count":2,"area":4},{"d":"乎","length":1,"count":3,"area":3}]]
+    ["barONEbarTWObarTHREE",[{"d":"bar","length":3,"count":3,"area":9},{"d":"barT","length":4,"count":2,"area":8},{"d":"ar","length":2,"count":3,"area":6},{"d":"ba","length":2,"count":3,"area":6},{"d":"arT","length":3,"count":2,"area":6},{"d":"rT","length":2,"count":2,"area":4},{"d":"r","length":1,"count":3,"area":3},{"d":"E","length":1,"count":3,"area":3},{"d":"b","length":1,"count":3,"area":3},{"d":"O","length":1,"count":2,"area":2},{"d":"T","length":1,"count":2,"area":2}]]
+    ["1baron3baron5baron0KING6KING7",[{"d":"baron","length":5,"count":3,"area":15},{"d":"aron","length":4,"count":3,"area":12},{"d":"baro","length":4,"count":3,"area":12},{"d":"ron","length":3,"count":3,"area":9},{"d":"bar","length":3,"count":3,"area":9},{"d":"KING","length":4,"count":2,"area":8},{"d":"on","length":2,"count":3,"area":6},{"d":"ba","length":2,"count":3,"area":6},{"d":"ING","length":3,"count":2,"area":6},{"d":"NG","length":2,"count":2,"area":4},{"d":"n","length":1,"count":3,"area":3},{"d":"b","length":1,"count":3,"area":3},{"d":"G","length":1,"count":2,"area":2}]]
+    ["0KING1baron3baron5baron6KING7",[{"d":"baron","length":5,"count":3,"area":15},{"d":"baro","length":4,"count":3,"area":12},{"d":"aron","length":4,"count":3,"area":12},{"d":"bar","length":3,"count":3,"area":9},{"d":"ron","length":3,"count":3,"area":9},{"d":"KING","length":4,"count":2,"area":8},{"d":"ba","length":2,"count":3,"area":6},{"d":"on","length":2,"count":3,"area":6},{"d":"ING","length":3,"count":2,"area":6},{"d":"NG","length":2,"count":2,"area":4},{"d":"n","length":1,"count":3,"area":3},{"d":"b","length":1,"count":3,"area":3},{"d":"G","length":1,"count":2,"area":2}]]
+    ["XXXOXXX0KING1baron2KING3baron4KING5baron6KING7XOX",[{"d":"KING","length":4,"count":4,"area":16},{"d":"baron","length":5,"count":3,"area":15},{"d":"ING","length":3,"count":4,"area":12},{"d":"KIN","length":3,"count":4,"area":12},{"d":"baro","length":4,"count":3,"area":12},{"d":"aron","length":4,"count":3,"area":12},{"d":"bar","length":3,"count":3,"area":9},{"d":"ron","length":3,"count":3,"area":9},{"d":"X","length":1,"count":8,"area":8},{"d":"KI","length":2,"count":4,"area":8},{"d":"NG","length":2,"count":4,"area":8},{"d":"on","length":2,"count":3,"area":6},{"d":"ba","length":2,"count":3,"area":6},{"d":"XOX","length":3,"count":2,"area":6},{"d":"XXX","length":3,"count":2,"area":6},{"d":"G","length":1,"count":4,"area":4},{"d":"K","length":1,"count":4,"area":4},{"d":"OX","length":2,"count":2,"area":4},{"d":"XX","length":2,"count":2,"area":4},{"d":"b","length":1,"count":3,"area":3},{"d":"n","length":1,"count":3,"area":3},{"d":"O","length":1,"count":2,"area":2}]]
     ]
   for [ probe, matcher, ] in probes_and_matchers
-    hits = L.find_repetitions probe
-    urge ( JSON.stringify [ probe, hits, ] )
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "xyz"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "barbarbar"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "abcdef"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "foobarbarbar"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions ""
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "oo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "foobarbarbarfoo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "foobarrbarrbarrfoo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "bannanana"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "䀠目几几几"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "barONEbarTWObarTHREE"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "1baron3baron5baron0KING6KING7"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "0KING1baron3baron5baron6KING7"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "XXXOXXX0KING1baron2KING3baron4KING5baron6KING7XOX"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "xxxo|xxx|xxo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "xxo|xxx|xxo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "xo|xxx|xxo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "o|xxx|xxo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "|xxx|xxo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "xxx|xxo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "xx|xxo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "x|xxo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "|xxo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "xxo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "xo"
-  # urge ( JSON.stringify hit ) for hit in L.find_repetitions "o"
+    results = JZR.find_repetitions probe
+    # urge ( JSON.stringify [ probe, results, ] )
+    T.ok CND.equals matcher, results
   T.end()
   return null
 
@@ -141,7 +54,7 @@ TAP.test "demo", ( T ) ->
     ]
   for text in texts
     info text
-    help ( JSON.stringify hit ) for hit in L.find_repetitions text
+    help ( JSON.stringify hit ) for hit in JZR.find_repetitions text
   T.end()
 
 
