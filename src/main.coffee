@@ -32,16 +32,20 @@ _copy_regex = ( regex, flags ) -> new RegExp regex.source, flags
     @_find_repetitions sub_text, text, collector
   # #.........................................................................................................
   # @_find_repetitions text, collector
-  R.push hit for _, hit of collector
+  for _, hit of collector
+    hit.coverage = hit.area / text_length
+    R.push hit
   R.sort ( a, b ) ->
-    { area: a_area, count: a_count, length: a_length, } = a
-    { area: b_area, count: b_count, length: b_length, } = b
-    return +1 if a_area   < b_area
-    return -1 if a_area   > b_area
-    return +1 if a_count  < b_count
-    return -1 if a_count  > b_count
-    return +1 if a_length < b_length
-    return -1 if a_length > b_length
+    { coverage: a_coverage, area: a_area, count: a_count, length: a_length, } = a
+    { coverage: b_coverage, area: b_area, count: b_count, length: b_length, } = b
+    return +1 if a_coverage < b_coverage
+    return -1 if a_coverage > b_coverage
+    return +1 if a_area     < b_area
+    return -1 if a_area     > b_area
+    return +1 if a_count    < b_count
+    return -1 if a_count    > b_count
+    return +1 if a_length   < b_length
+    return -1 if a_length   > b_length
     return  0
   return R
 
