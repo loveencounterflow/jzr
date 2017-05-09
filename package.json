@@ -20,7 +20,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "cnd": "^4.2.2",
-    "tap": "^10.3.2"
+    "cnd": "^4.2.2"
   }
 }
