@@ -1,6 +1,6 @@
 {
   "name": "jzr",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Prelimary: find repetitions in strings, naive algorithm (for lack of a nail)",
   "main": "lib/main.js",
   "scripts": {
