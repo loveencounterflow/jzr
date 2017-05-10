@@ -16,7 +16,7 @@ echo                      = CND.echo.bind CND
 JZR                       = require '../..'
 TAP                       = require 'tap'
 
-
+###
 #-----------------------------------------------------------------------------------------------------------
 TAP.test "additional 5", ( T ) ->
   probes_and_matchers = [
@@ -48,17 +48,92 @@ TAP.test "additional 5", ( T ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "demo", ( T ) ->
+TAP.test "demo 1", ( T ) ->
   texts = [
     "䀠几乎目几乎几几几几乎"
     "几乎几乎几乎几乎"
     "几几几几乎䀠几乎目几乎"
     "𠃊𠃌一"
+    "凵日𠣏日𠣏"
+    "YABAB"
+    "YABABCDCD"
     ]
   for text in texts
     info text
     help ( JSON.stringify hit ) for hit in JZR.find_repetitions text
   T.end()
+###
+
+MultiSet = require 'mnemonist/multi-set'
+
+#-----------------------------------------------------------------------------------------------------------
+_ngrams_from_chrs = ( chrs, min, max ) ->
+  count     = chrs.length
+  R         = []
+  last_idx  = count - 1
+  if count >= min
+    for d in [ min .. max ]
+      if ( stop = count - d ) >= 0
+        for idx_0 in [ 0 .. count - d ]
+          R.push chrs[ idx_0 ... idx_0 + d ]
+  #.........................................................................................................
+  R[ idx ] = R[ idx ].join '' for idx in [ 0 ... R.length ]
+  #.........................................................................................................
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+repetitions_from_text = ( text ) ->
+  R           = []
+  chrs        = Array.from text
+  text_length = chrs.length
+  return R if text_length < 2
+  ngrams      = MultiSet.from _ngrams_from_chrs chrs, 1, 6
+  #.........................................................................................................
+  for d from ( new Set ngrams ).keys()
+    continue if ( degree = ngrams.multiplicity d ) < 2
+    pattern_2       = /// #{CND.escape_regex d} ///g
+    count           = 0
+    count          += +1 while pattern_2.exec text
+    continue if count < 2
+    d_size          = ( Array.from d ).length
+    area            = d_size * count
+    coverage        = area / text_length
+    hit             = { d, length: d_size, count, area, coverage, }
+    R.push hit
+  #.........................................................................................................
+  R.sort ( a, b ) ->
+    { area: a_area, count: a_count, length: a_length, } = a
+    { area: b_area, count: b_count, length: b_length, } = b
+    #.......................................................................................................
+    return +1 if a_area     < b_area
+    return -1 if a_area     > b_area
+    #.......................................................................................................
+    return -1 if a_length   < b_length
+    return +1 if a_length   > b_length
+    #.......................................................................................................
+    return +1 if a_count    < b_count
+    return -1 if a_count    > b_count
+    #.......................................................................................................
+    return  0
+  #.........................................................................................................
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+TAP.test "demo 2", ( T ) ->
+  texts = [
+    "YABAB"
+    "YABABCDCD"
+    "䀠几乎目几乎几几几几乎"
+    "几乎几乎几乎几乎"
+    "几几几几乎䀠几乎目几乎"
+    "𠃊𠃌一"
+    "凵日𠣏日𠣏"
+    ]
+  for text in texts
+    help text
+    info ( JSON.stringify hit ) for hit in repetitions_from_text text
+  T.end()
+
 
 
 
