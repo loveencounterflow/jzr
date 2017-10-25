@@ -39,17 +39,15 @@ _ngrams_from_chrs = ( chrs, min, max ) ->
   text_length = chrs.length
   return R if text_length < 2
   ngrams      = MultiSet.from _ngrams_from_chrs chrs, 1, 6
+  # debug '32302', 'chrs', chrs
+  debug '32302', 'ngrams', _ngrams_from_chrs chrs, 1, 6
+  debug '32302', 'ngrams', ngrams
   #.........................................................................................................
   for d from ( new Set ngrams ).keys()
     continue if ( degree = ngrams.multiplicity d ) < 2
-    pattern_2       = /// #{CND.escape_regex d} ///g
-    count           = 0
-    count          += +1 while pattern_2.exec text
-    continue if count < 2
     d_size          = ( Array.from d ).length
-    area            = d_size * count
-    coverage        = area / text_length
-    hit             = { d, length: d_size, count, area, coverage, }
+    area            = d_size * degree
+    hit             = { d, length: d_size, area, degree, }
     R.push hit
   #.........................................................................................................
   R.sort ( a, b ) ->
